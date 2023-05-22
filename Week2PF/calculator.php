@@ -2,14 +2,16 @@
     
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        if (!isset($_POST['int1']) or !isset($_POST['int2']) or !isset($_POST['op'])) {
+        if (empty($_POST['int1']) or empty($_POST['int2']) or empty($_POST['op'])) {
             http_response_code(400);
             print json_encode(["status"=>'F', "message"=>'One of the fields are empty']);
         } else {
             $calculator = new Calculator($_POST['int1'], $_POST['int2'], $_POST['op']);
-            print json_encode([
-                "status"=>'F',
-                 "message"=>$calculator->calculate_result()]);
+            $calculator->calculate_result();
+            // print json_encode(
+            //     [
+            //     "status"=>'S',
+            //      "message"=>$calculator->calculate_result()]);
         }
     }
     class Calculator {

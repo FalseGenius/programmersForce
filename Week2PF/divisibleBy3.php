@@ -4,7 +4,7 @@
 
         $data = json_decode(file_get_contents('php://input'), true);
 
-        print json_encode(['status'=>'F', "message"=>divisibleByThree($data['arr'])]);
+        print json_encode(['status'=>'S', "message"=>divisibleByThree($data['arr'])]);
 
 
         // if (!isset($_POST['arr'])) {
