@@ -14,5 +14,5 @@ Start Apache Server
 The endpoint is available at,
 
 ```bash
-http://localhost:<port>/odelView/index.php
+http://localhost:<port>/ModelView/index.php
 ```
