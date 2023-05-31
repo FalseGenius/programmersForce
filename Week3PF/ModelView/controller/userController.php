@@ -50,7 +50,7 @@ class UserController
 
     public function update($id, $data)
     {
-        $isAdmin = true; // Example: Set isAdmin based on authentication result
+        $isAdmin = true; 
 
         if ($isAdmin) {
             $result = $this->model->update($id, $data);
@@ -68,7 +68,7 @@ class UserController
     public function delete($id)
     {
         
-        $isAdmin = true; // Example: Set isAdmin based on authentication result
+        $isAdmin = true; 
 
         if ($isAdmin) {
             $result = $this->model->delete($id);
