@@ -12,10 +12,10 @@
 
 
     class ConnectAndCreate {
-        private $name = 'ecommerce';
+        private $name = 'dbName';
         private $localhost = 'localhost';
         private $user = 'postgres';
-        private $pass = 'qazQAZ123';
+        private $pass = 'password';
         private $port = 5432;
 
         private $dbconn;
