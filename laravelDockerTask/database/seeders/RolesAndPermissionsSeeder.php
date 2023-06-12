@@ -21,13 +21,14 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Permissions for the stated roles 
         $createPermission = Permission::create(["name"=>"create users"]);
-        $readPermission = Permission::create(["name"=>"read users"]);
+        $readAllPermission = Permission::create(["name"=>"read users"]);
+        $readOnePermission = Permission::create(["name"=>"read user"]);
         $updatePermission = Permission::create(["name"=>"update users"]);
         $deletePermission = Permission::create(["name"=>"delete users"]);
 
 
-        $adminRole->syncPermissions([$createPermission, $readPermission, $updatePermission, $deletePermission]);
-        $userRole->givePermissionTo($readPermission);
+        $adminRole->syncPermissions([$createPermission, $readAllPermission, $readOnePermission, $updatePermission, $deletePermission]);
+        $userRole->givePermissionTo($readOnePermission);
         
     }
 }

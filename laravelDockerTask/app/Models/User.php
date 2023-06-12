@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
-use Illuminate\Foundation\Auth\Access\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Model implements Authenticatable, JWTSubject

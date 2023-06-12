@@ -26,19 +26,7 @@ Route::post('users', [UserController::class, 'store']);
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users', [UserController::class, 'index']);
-    // Route::get('users/{id}', [UserController::class, 'show']);
-    // Route::put('users/{id}', [UserController::class, 'update']);
-    // Route::delete('users/{id}', [UserController::class, 'destroy']);
-});
-
-Route::group(['middleware' => ['jwt.auth', 'permission:update users']], function () {
+    Route::get('users/{id}', [UserController::class, 'show']);
     Route::put('users/{id}', [UserController::class, 'update']);
-});
-
-Route::group(['middleware' => ['jwt.auth', 'permission:read users']], function () {
-    Route::put('users/{id}', [UserController::class, 'show']);
-});
-
-Route::group(['middleware' => ['jwt.auth', 'permission:destroy users']], function () {
-    Route::put('users/{id}', [UserController::class, 'destroy']);
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
 });

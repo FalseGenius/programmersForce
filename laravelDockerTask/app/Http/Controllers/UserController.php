@@ -21,11 +21,12 @@ class UserController extends Controller
 
         $user = JWTAuth::parseToken()->authenticate();
 
-        if ($user->hasRole('admin')) {
+        // if ($user->hasRole('admin')) {
+        if ($user->hasPermissionTo('read users')) {
             $users = User::all();
             return response()->json($users);
         } else {
-            return response()->json($user);
+            return response()->json(["message"=>"You do not have sufficient permissions"]);
         }
        
     }
@@ -66,8 +67,7 @@ class UserController extends Controller
         //
         $authUser = JWTAuth::parseToken()->authenticate();
         $user = User::findOrFail($id);
-        
-        if ($authUser->id == $user->id || $authUser->hasRole('admin')) {
+        if ($authUser->id == $user->id || $authUser->hasPermissionTo('read user')) {
             $data = $user->only(['username', 'email']);
             return response()->json($data);
         }
@@ -97,18 +97,14 @@ class UserController extends Controller
             }
             $user->update($data);
             return response()->json($user);
-        } else if ($authUser->hasRole('admin')) {
-            $request->validate([
-                'username'=>'sometimes'
-            ]);
-
+        } else if ($authUser->hasPermissionTo('update users')) {
+            $request->validate(['username'=>'sometimes']);
             $data = $request->only('username');
             $user->update($data);
-
             return response()->json($user);
         }
 
-        return response()->json(['error'=>'Unauthorized'], 403);
+        return response()->json(['error'=>'You are not authorized, or you do not have sufficient permissions'], 403);
     }
 
     /**
@@ -120,11 +116,11 @@ class UserController extends Controller
         $authUser = JWTAuth::parseToken()->authenticate();
         $user = User::findOrFail($id);
 
-        if ($authUser->id == $user->id || $authUser->hasRole('admin')) {
+        if ($authUser->id == $user->id || $authUser->hasPermissionTo('delete users')) {
             $user->delete();
             return response()->json(['Status'=>'S', 'Message'=>'Successfully Deleted']);
         }
 
-        return response()->json(['error'=>'Unauthorized']);
+        return response()->json(['error'=>'You are unauthorized, or you do not have sufficient permisssions']);
     }
 }
