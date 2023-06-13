@@ -30,5 +30,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('users/{id}', [UserController::class, 'show']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
-    Route::get('check-ip', [AddressController::class, 'checkIPAddress']);
 });
+
+Route::get('check-ip', [AddressController::class, 'checkIn']);
+Route::get('checkout', [AddressController::class, 'checkout']);

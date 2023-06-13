@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Address;
+use App\Models\addressUsers;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class AddressController extends Controller
 {
@@ -13,70 +16,43 @@ class AddressController extends Controller
      * 
      */
 
-    public function checkIPAddress(Request $request) {
+    public function checkIn(Request $request) {
         // $ip =  $request->ip();
         $ip = $request->ip();
 
         $address = Address::where('ip_address', $ip)->first();
         
         if ($address) {
-            return response()->json(["Message"=>"IP found in the table"]);
-        }
+            addressUsers::create([
+                "ip_address"=>$ip,
+                "checkIn_time"=>Carbon::now()
+            ]);
 
+            return response()->json($address);
+
+
+        }
         return response()->json(['Message'=>"It is a remote user. Your IP is " . $ip]);
     }
 
-    public function index()
-    {
-        //
+    public function checkout(Request $request) {
+        $ip = $request->ip();
+        $endTime = Carbon::now();
+        $address = Address::where('ip_address', $ip)->first();
+        if ($address) {
+            // Calculate difference between $this->startTime and $endTime
+            $ipUser = addressUsers::where('ip_address', $ip)->first();
 
-    }
+            $difference = $endTime->diffInHours($ipUser->checkIn_time);
+            $ipUser->checkout_time = $endTime;
+            $ipUser->stay_duration = $difference;
+            $ipUser->save();
+            return response()->json([
+                "ip_address"=> $ip,
+                "location"=> $address->location,
+                "stay_duration"=>$difference
+            ]);
+        }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

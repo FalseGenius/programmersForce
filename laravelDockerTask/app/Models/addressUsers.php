@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Address extends Model
+class addressUsers extends Model
 {
     use HasFactory;
+    protected $fillable = ['ip_address', "checkIn_time", "checkout_time", "stay_duration"];
 }
