@@ -15,13 +15,13 @@ class AddressesTableSeeder extends Seeder
     {
         //
         Address::create([
-            'ip_address'=>'192.168.1.1',
+            'ip_address'=>'172.16.4.122',
             'location'=>'PF Ground 1'
         ]);
 
         Address::create([
-            'ip_address'=>'192.168.1.2',
-            'location'=>'PF Ground 2'
+            'ip_address'=>'192.168.1.1',
+            'location'=>'Remote'
         ]);
     }
 }

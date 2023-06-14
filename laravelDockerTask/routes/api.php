@@ -34,3 +34,4 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 
 Route::get('check-ip', [AddressController::class, 'checkIn']);
 Route::get('checkout', [AddressController::class, 'checkout']);
+Route::get('registerIP', [AddressController::class, 'registerIP']);

@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class addressUsers extends Model
 {
     use HasFactory;
-    protected $fillable = ['ip_address', "checkIn_time", "checkout_time", "stay_duration"];
+    protected $fillable = ['ip_address', "checkIn_time", "checkout_time", "stay_duration", "workday_status"];
 }
