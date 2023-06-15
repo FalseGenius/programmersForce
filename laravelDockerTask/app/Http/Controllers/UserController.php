@@ -6,6 +6,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -21,10 +22,17 @@ class UserController extends Controller
 
         $user = JWTAuth::parseToken()->authenticate();
 
-        // if ($user->hasRole('admin')) {
         if ($user->hasPermissionTo('read users')) {
-            $users = User::all();
-            return response()->json($users);
+            $selectedColumns = ['id', 'username', 'email', 'role', 'created_at'];
+            if ($user->hasRole('Super-Admin')) {
+                $users = User::select($selectedColumns)->get();
+                return response()->json($users);
+            } else {
+                $users = User::whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'Super-Admin');
+                })->select($selectedColumns)->get();
+                return response()->json($users);
+            }
         } else {
             return response()->json(["message"=>"You do not have sufficient permissions"]);
         }
@@ -32,32 +40,65 @@ class UserController extends Controller
     }
 
 
+    private function createUser($request, $roleToAssign) {
+            $user = User::create([
+                'username'=>$request->username,
+                'email'=>$request->email,
+                'password'=>bcrypt($request->password),
+                'role'=>$roleToAssign
+            ]);
+
+            $user->assignRole($roleToAssign);
+
+            return $user;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'email'=>'required|email|unique:users',
-                'password'=>'required|min:6',
-                'user_role'=>'required|in:admin,user'
-            ]);
-    
-            $user = User::create([
-                'username'=>$request->username,
-                'email'=>$request->email,
-                'password'=>bcrypt($request->password),
-                // 'user_role'=>$request->user_role
-            ]);
-    
-            $role = $request->user_role;
-            $user->assignRole($role);
-            return response()->json($user, 201);
+
+
+            $user = JWTAuth::parseToken()->authenticate();
+            $roleToAssign = 'user';
+
+            if ($user->hasRole('Super-Admin')) {
+                $request->validate([
+                    'email'=>'required|email|unique:users',
+                    'password'=>'required|min:6',
+                    'role'=>'required|in:Super-Admin,admin,user'
+                ]);
+                $roleToAssign = $request->role;
+            } else if ($user->hasRole('admin')) {
+                $request->validate([
+                    'email'=>'required|email|unique:users',
+                    'password'=>'required|min:6',
+                ]);
+                if ($request->role) {
+                    return response()->json(["Message"=>"You do not have sufficient permissions to assign roles"], 403);
+                }
+            } else {
+                return response()->json(["Message"=>"You do not have sufficient permissions"], 403);
+            }
+
+
+            if ($user->hasPermissionTo('create users')) {
+                $newUser = $this->createUser($request, $roleToAssign);
+               
+                return response()->json($newUser, 201);
+
+            } else {
+                return response()->json(['Message'=>"You do not have sufficient permissions"], 403);
+            }
+
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error'=>$e->errors()], 422);
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -67,8 +108,16 @@ class UserController extends Controller
         //
         $authUser = JWTAuth::parseToken()->authenticate();
         $user = User::findOrFail($id);
-        if ($authUser->id == $user->id || $authUser->hasPermissionTo('read user')) {
-            $data = $user->only(['username', 'email']);
+        if ($authUser->hasPermissionTo('read user')) {
+            if ($authUser->id != $user->id && $authUser->role =='user') {
+                return response()->json(["Message"=>"You do not have sufficient permissions to view other users"]);
+            }
+
+            if ($authUser->id != $user->id && $authUser->role =='admin' && $user->role =='Super-Admin') {
+                return response()->json(["Message"=>"You do not have sufficient permissions to view this user"]);
+            }
+            
+            $data = $user->only(['username', 'email', "role", "created_at"]);
             return response()->json($data);
         }
 
@@ -76,35 +125,29 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a user role
      */
     public function update(Request $request, string $id)
     {
         //
         $authUser = JWTAuth::parseToken()->authenticate();
-        $user = User::findOrFail($id);
-        
-        if ($authUser->id == $user->id) {
+
+        if ($authUser->hasRole('Super-Admin')) {
             $request->validate([
-                'username'=>'sometimes',
-                'email'=>'sometimes|email|unique:users,email'.$id,
-                'password'=>'sometimes|min:6'
+                'role'=>'sometimes|in:admin,user'
             ]);
-            
-            $data = $request->only('username', 'email', 'password');
-            if ($request->filled('password')) {
-                $data['password'] = bcrypt($data['password']);
-            }
-            $user->update($data);
-            return response()->json($user);
-        } else if ($authUser->hasPermissionTo('update users')) {
-            $request->validate(['username'=>'sometimes']);
-            $data = $request->only('username');
-            $user->update($data);
-            return response()->json($user);
+
+            $user = User::findOrFail($id);
+            $data = $request->only('role');
+            $user->syncRoles($data['role']);
+            $user->role = $data['role'];
+            $user->save();
+            return response()->json(["Message"=>"Successfully updated user.", "User details"=>$user], 403);
+
+        } else {
+            return response()->json(["Message"=>"You do not have sufficient permissions to update roles"], 403);
         }
 
-        return response()->json(['error'=>'You are not authorized, or you do not have sufficient permissions'], 403);
     }
 
     /**
@@ -116,7 +159,10 @@ class UserController extends Controller
         $authUser = JWTAuth::parseToken()->authenticate();
         $user = User::findOrFail($id);
 
-        if ($authUser->id == $user->id || $authUser->hasPermissionTo('delete users')) {
+        if ($authUser->hasPermissionTo('delete users')) {
+            if (($user->role === 'Super-Admin' || $user->role == 'admin') && $authUser->role != 'Super-Admin') {
+                return response()->json(["Message"=>"You do not have sufficient permissions to delete this user"]);
+            }
             $user->delete();
             return response()->json(['Status'=>'S', 'Message'=>'Successfully Deleted']);
         }

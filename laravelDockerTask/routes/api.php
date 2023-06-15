@@ -22,9 +22,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('login', [AuthController::class, 'login']);
-Route::post('users', [UserController::class, 'store']);
 
 Route::group(['middleware' => 'jwt.auth'], function () {
+    Route::post('register', [UserController::class, 'store']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users', [UserController::class, 'index']);
     Route::get('users/{id}', [UserController::class, 'show']);
@@ -32,6 +32,6 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 });
 
-Route::get('check-ip', [AddressController::class, 'checkIn']);
+Route::get('checkin', [AddressController::class, 'checkIn']);
 Route::get('checkout', [AddressController::class, 'checkout']);
 Route::get('registerIP', [AddressController::class, 'registerIP']);

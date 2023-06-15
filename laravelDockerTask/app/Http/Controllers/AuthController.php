@@ -20,8 +20,9 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error'=>'Couldn"t create token'], 500);
         }
-        
+
         return response()->json(compact('token'));
+        
     }
 
     public function logout () {

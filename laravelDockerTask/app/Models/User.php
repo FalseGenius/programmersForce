@@ -15,7 +15,7 @@ class User extends Model implements Authenticatable, JWTSubject
     use HasFactory;
     use AuthenticatableTrait;
 
-    protected $fillable = ['username', 'email', 'password'];
+    protected $fillable = ['username', 'email', 'password', 'role'];
 
     public function orders()
     {

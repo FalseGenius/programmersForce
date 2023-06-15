@@ -21,17 +21,26 @@ class AddressController extends Controller
 
     public function registerIP(Request $request) {
         $ip = $request->ip();
+        // explode is split of php. In js, we use split
         $segment = explode(".", $ip);
+        // Implode is the join of php. In js, we use join.
         $firstThreeSegments = implode('.', array_slice($segment, 0, 3));
 
-        $matchingAddress = Address::where(DB)
+        $local = '';
+
+        $matchingAddress = Address::where('ip_address', $firstThreeSegments)->first();
+        if ($matchingAddress) {
+            $local = 'PF Ground 1';
+        } else {
+            $local = 'remote';
+        }
 
         Address::create([
             "ip_address"=>$ip,
-            "location"=>"PF Ground 1"
+            "location"=>$local,
         ]);
 
-        return response()->json(["Message"=>"We have registered your ip"]);
+        return response()->json(["Message"=>"We have registered your IP. Your IP is ". $ip]);
     }
 
     
@@ -39,24 +48,30 @@ class AddressController extends Controller
     public function checkIn(Request $request) {
         $ip = $request->ip();
 
-        $address = Address::where('ip_address', $ip)->first();
-        // $location = $address->location ?? 'remote';
-        // if ($address) {
-            
-        //     return response()->json($address);
-
-        // }
+        $ipExists = addressUsers::where('ip_address', $ip)->first();
+        if (!empty($ipExists->checkIn_time)) {
+            return response()->json(["Message"=>"You have to check out first before checking in again!"]);
+        }
         
-        addressUsers::create([
-            "ip_address"=>$ip,
-            "checkIn_time"=>Carbon::now()
-        ]);
+        // explode is split of php. In js, we use split.
+        $segment = explode(".", $ip);
+        // Implode is the join of php. In js, we use join.
+        $match = implode('.', array_slice($segment, 0, 3));
+
+
+        $address = Address::where('ip_address', $match)->first();
         
 
         if ($address) {
-            return response()->json(['Message'=>"Your office IP is " . $ip]);
-        }
+            
+            addressUsers::create([
+                "ip_address"=>$ip,
+                "checkIn_time"=>Carbon::now()
+            ]);
 
+            return response()->json(['Message'=>"You have successfully checked in! Your IP is " . $ip]);
+        }
+        
         return response()->json(['Message'=>"You are a remote user. Your ip is " . $ip]);
 
         
@@ -82,10 +97,13 @@ class AddressController extends Controller
  
     public function checkout(Request $request) {
         $ip = $request->ip();
-        $address = Address::where('ip_address', $ip)->first();
-        $location = $address->location ?? 'remote';
-        $endTime = Carbon::now();
+        $addressUser = addressUsers::where('ip_address', $ip)->orderBy('id', 'desc')->first();
+        
+        if (!$addressUser || $addressUser->checkout_time !== null) {
+            return response()->json(["Message"=>"Check in first!"]);
+        }
 
+        $endTime = Carbon::now();
         $ipUser = addressUsers::where('ip_address', $ip)->first();
         $difference = $endTime->diffInHours($ipUser->checkIn_time);
 
