@@ -8,8 +8,7 @@ use App\Models\addressUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AddressController extends Controller
 {
@@ -46,10 +45,11 @@ class AddressController extends Controller
     
 
     public function checkIn(Request $request) {
+        $user = JWTAuth::parseToken()->authenticate();
         $ip = $request->ip();
 
-        $ipExists = addressUsers::where('ip_address', $ip)->first();
-        if (!empty($ipExists->checkIn_time)) {
+        $ipExists = addressUsers::where('ip_address', $ip)->whereNotNull('checkIn_time')->whereNull('checkout_time')->first();
+        if ($ipExists) {
             return response()->json(["Message"=>"You have to check out first before checking in again!"]);
         }
         
@@ -64,7 +64,7 @@ class AddressController extends Controller
 
         if ($address) {
             
-            addressUsers::create([
+            $user->addressUsers()->create([
                 "ip_address"=>$ip,
                 "checkIn_time"=>Carbon::now()
             ]);
@@ -97,20 +97,17 @@ class AddressController extends Controller
  
     public function checkout(Request $request) {
         $ip = $request->ip();
-        $addressUser = addressUsers::where('ip_address', $ip)->orderBy('id', 'desc')->first();
+        $user = JWTAuth::parseToken()->authenticate();
+        $addressUser = $user->addressUsers()->where('ip_address', $ip)->whereNotNull('checkIn_time')->whereNull('checkout_time')->latest('checkIn_time')->first();
         
-        if (!$addressUser || $addressUser->checkout_time !== null) {
+        if (!$addressUser) {
             return response()->json(["Message"=>"Check in first!"]);
         }
 
         $endTime = Carbon::now();
-        $ipUser = addressUsers::where('ip_address', $ip)->first();
-        $difference = $endTime->diffInHours($ipUser->checkIn_time);
+        $difference = $endTime->diffInHours($addressUser->checkIn_time);
 
-        $this->handleLogic($difference, $ipUser, $endTime);            
-        return response()->json($ipUser);
-        // }
-
-        // Logic for remote person
+        $this->handleLogic($difference, $addressUser, $endTime);            
+        return response()->json($addressUser);
     }
 }

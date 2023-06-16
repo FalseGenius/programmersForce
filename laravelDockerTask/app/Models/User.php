@@ -17,6 +17,11 @@ class User extends Model implements Authenticatable, JWTSubject
 
     protected $fillable = ['username', 'email', 'password', 'role'];
 
+
+    public function addressUsers() {
+        return $this->hasMany(addressUsers::class, 'user_id', 'id');
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id', 'id');

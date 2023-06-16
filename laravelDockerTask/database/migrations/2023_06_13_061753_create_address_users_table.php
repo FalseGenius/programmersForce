@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('address_users', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('ip_address');
             $table->timestamp('checkIn_time')->nullable();
             $table->timestamp('checkout_time')->nullable();
@@ -20,6 +21,8 @@ return new class extends Migration
             // $table->string('location')->nullable();
             $table->string('workday_status')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
