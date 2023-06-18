@@ -22,7 +22,6 @@ php artisan serve
 
 
 
-
 ### Login and Register endpoints
 
 Login Endpoint is available at "http://127.0.0.1:8000/api/login" via POST request. 
