@@ -67,12 +67,12 @@ Inputs required (coming from frontend | postman):
 
 #### Auth token required for CRUD APIs and Checkin/Checkout APIs
 
-View all users -  Endpoint is available at "http://127.0.0.1:8000/api/login" via GET request.
+View all users -  Endpoint is available at "http://127.0.0.1:8000/api/users" via GET request.
  - Super-admin can view all users
  - User with role "admin" can view all all users except super-admin details
  - User with role "user" is not authorized to view any other user
 
-View one user -  Endpoint is available at "http://127.0.0.1:8000/api/login/<id>" via GET request.
+View one user -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" via GET request.
  - Super-admin can view any user by providing the id
  - User with role "admin" can view any user by providing id [Super-admin excluded]
  - User with role "user" is authorized to view their own information by providing id
