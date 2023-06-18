@@ -96,3 +96,4 @@ Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET requ
     Checkin API saves user ip, location and checkin time to the database.
     Checkout API calculates the stay_duration of a user, and checks them out of the system [Ends their session].
 
+At the end of each day, stay_duration of each user is summmed-up and stored [View app\Console\Commands\CalculateDailySessions.php for details]
