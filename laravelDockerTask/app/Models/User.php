@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\DailyUserSession;
+
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +27,10 @@ class User extends Model implements Authenticatable, JWTSubject
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id', 'id');
+    }
+
+    public function dailySessions() {
+        return $this->hasMany(DailyUserSession::class);
     }
 
     public function getJWTIdentifier() {

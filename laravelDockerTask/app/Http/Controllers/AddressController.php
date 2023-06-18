@@ -42,13 +42,20 @@ class AddressController extends Controller
         return response()->json(["Message"=>"We have registered your IP. Your IP is ". $ip]);
     }
 
-    
+    // Save user ip/location
+    private function registerUserLocIP($user, $ip, $location) {
+        $user->addressUsers()->create([
+            "ip_address"=>$ip,
+            "checkIn_time"=>Carbon::now(),
+            "location"=>$location
+        ]);
+    }
 
     public function checkIn(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
         $ip = $request->ip();
 
-        $ipExists = addressUsers::where('ip_address', $ip)->whereNotNull('checkIn_time')->whereNull('checkout_time')->first();
+        $ipExists = $user->addressUsers()->where('ip_address', $ip)->whereNotNull('checkIn_time')->whereNull('checkout_time')->first();
         if ($ipExists) {
             return response()->json(["Message"=>"You have to check out first before checking in again!"]);
         }
@@ -57,39 +64,34 @@ class AddressController extends Controller
         $segment = explode(".", $ip);
         // Implode is the join of php. In js, we use join.
         $match = implode('.', array_slice($segment, 0, 3));
-
-
         $address = Address::where('ip_address', $match)->first();
         
-
         if ($address) {
             
-            $user->addressUsers()->create([
-                "ip_address"=>$ip,
-                "checkIn_time"=>Carbon::now()
-            ]);
+            $this->registerUserLocIP($user, $ip, $address->location);
 
             return response()->json(['Message'=>"You have successfully checked in! Your IP is " . $ip]);
         }
         
-        return response()->json(['Message'=>"You are a remote user. Your ip is " . $ip]);
-
+        $this->registerUserLocIP($user, $ip, 'remote');
+        return response()->json(['Message'=>"You have successfully checked in as a remote user. Your ip is " . $ip]);
         
     }
 
 
-    private function handleLogic ($difference, $db, $endTime) {
-        if ($difference > 5) {  
+    private function handleLogic ($differenceInMinutes, $db, $endTime) {
+        $differenceInHours = $differenceInMinutes / 60;
+        if ($differenceInHours >= 5) {  
             $db->workday_status = "Working day complete";
-        } else if ($difference < 3) {
+        } else if ($differenceInHours < 3) {
             $db->workday_status = "Absent";
-        } else if ($difference >= 3 && $difference < 5) {
+        } else if ($differenceInHours >= 3 && $differenceInHours < 5) {
             $db->workday_status = "Half day complete";
         } else {
             // Implement it later
         }
         
-        $db->stay_duration = $difference;
+        $db->stay_duration = $differenceInHours;
         $db->checkout_time = $endTime;
         $db->save();
 
@@ -105,7 +107,8 @@ class AddressController extends Controller
         }
 
         $endTime = Carbon::now();
-        $difference = $endTime->diffInHours($addressUser->checkIn_time);
+        $difference = $endTime->diffInMinutes($addressUser->checkIn_time);
+        // $difference = $endTime->diffInHours($addressUser->checkIn_time);
 
         $this->handleLogic($difference, $addressUser, $endTime);            
         return response()->json($addressUser);

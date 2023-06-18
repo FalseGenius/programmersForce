@@ -24,9 +24,5 @@ class AddressesTableSeeder extends Seeder
             'location'=>'PF Ground 2'
         ]);
 
-        Address::create([
-            'ip_address'=>'172.18.48',
-            'location'=>'Home'
-        ]);
     }
 }

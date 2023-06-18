@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('ip_address');
             $table->timestamp('checkIn_time')->nullable();
             $table->timestamp('checkout_time')->nullable();
-            $table->string('stay_duration')->nullable();
-            // $table->string('location')->nullable();
+            $table->decimal('stay_duration', 4, 1)->nullable();
             $table->string('workday_status')->nullable();
+            $table->string('location')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
