@@ -30,13 +30,12 @@ class CalculateDailySessions extends Command
         //
         $users = User::all();
         foreach($users as $user) {
-            $totalStayDuration = $user->addressUsers()->whereDate("checkIn_time", Carbon::today())->sum('stay_duration');
+            $totalStayDuration = $user->addressUsers()->whereDate("checkIn_time", Carbon::yesterday())->sum('stay_duration');
             $user->dailySessions()->create([
                 'date'=>Carbon::yesterday(),
                 'total_stay_duration'=>$totalStayDuration
             ]);
         }
-
 
     }
 }
