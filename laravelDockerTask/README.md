@@ -45,7 +45,7 @@ Output
 ```
 
 
-Once the super-admin logs in, they can register users and assign them roles [admin or user].
+Once the super-admin logs in, they can register users and assign them roles [admin or user]. Once user is registered, they can log into the system.
 User with role "admin" is allowed CRUD operations, and they can register users as well, but they cannot assign roles. 
 User with role "user" is allowed to view their data only. They do not have sufficient permissions for other operations.
 
@@ -91,5 +91,8 @@ Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" v
 ### Checkin and Checkout APIs
     
 Checkin Endpoint - Available at http://127.0.0.1:8000/api/checkin via GET request
-
+Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET request
+    
+    Checkin API saves user ip, location and checkin time to the database.
+    Checkout API calculates the stay_duration of a user, and checks them out of the system [Ends their session].
 
