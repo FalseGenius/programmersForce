@@ -1,66 +1,98 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Spatie- Roles and Permission | User IP/Location APIs 
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Project Description
 
-## About Laravel
+This project leverages spatie package in order to assign roles and permissions to a user. User is added to the system by a super-admin [A role is assigned here]. Once added, user can trigger checkin and checkout APIs.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Checkin API - Captures authorized user's ip, and checkin time.
+Checkout API - Captures authorized user's ip, calculates their stay_duration and saves the details in postgreSQL.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### To spin up the server
 
-## Learning Laravel
+Clone the repo and run the following commands
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Execute:
+```bash
+composer install
+php artisan migrate:fresh --seed
+php artisan serve 
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Login and Register endpoints
 
-### Premium Partners
+Login Endpoint is available at "http://127.0.0.1:8000/api/login" via POST request. 
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Inputs required (coming from frontend | postman):
 
-## Contributing
+```bash
+{
+    "email":"superadmin@123.com",
+    "password":"qazQAZ123"
+}
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Output 
 
-## Code of Conduct
+```bash
+{
+    "token":<authToken>
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+Once the super-admin logs in, they can register users and assign them roles [admin or user]. Once user is registered, they can log into the system.
+User with role "admin" is allowed CRUD operations, and they can register users as well, but they cannot assign roles. 
+User with role "user" is allowed to view their data only. They do not have sufficient permissions for other operations.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+Register Endpoint is available at "http://127.0.0.1:8000/api/register" via POST request. 
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Inputs required (coming from frontend | postman):
+
+```bash
+{
+    "username":"hello",
+    "email":"hello@123.com",
+    "password":"qazQAZ123",
+    "role":"user" // Only super-admin is allowed to include this. If admin includes this, default role [default role: user] gets used
+}
+```
+
+
+### CRUD endpoints [Check app/Http/Controllers/UserController for more details]
+
+#### Auth token required for CRUD APIs and Checkin/Checkout APIs
+
+View all users -  Endpoint is available at "http://127.0.0.1:8000/api/login" via GET request.
+ - Super-admin can view all users
+ - User with role "admin" can view all all users except super-admin details
+ - User with role "user" is not authorized to view any other user
+
+View one user -  Endpoint is available at "http://127.0.0.1:8000/api/login/<id>" via GET request.
+ - Super-admin can view any user by providing the id
+ - User with role "admin" can view any user by providing id [Super-admin excluded]
+ - User with role "user" is authorized to view their own information by providing id
+    
+Delete user -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" via DELETE request.
+ - Super-admin can delete any user by providing the id
+ - User with role "admin" can delete any user by providing id [Super-admin and other admins excluded]
+ - User with role "user" is not authorized to trigger this API
+ 
+Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" via PUT request.
+ - Only Super-admin can edit user roles by providing the id and input field "role"
+    
+
+
+### Checkin and Checkout APIs
+    
+Checkin Endpoint - Available at http://127.0.0.1:8000/api/checkin via GET request
+Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET request
+    
+    Checkin API saves user ip, location and checkin time to the database.
+    Checkout API calculates the stay_duration of a user, and checks them out of the system [Ends their session].
+
+At the end of each day, stay_duration of each user is summmed-up and stored [View app\Console\Commands\CalculateDailySessions.php for details]
