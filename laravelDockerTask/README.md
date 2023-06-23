@@ -67,32 +67,34 @@ Inputs required (coming from frontend | postman):
 
 #### Auth token required for CRUD APIs and Checkin/Checkout APIs
 
-View all users -  Endpoint is available at "http://127.0.0.1:8000/api/login" via GET request.
+View all users -  Endpoint is available at "http://127.0.0.1:8000/api/users" via GET request.
  - Super-admin can view all users
  - User with role "admin" can view all all users except super-admin details
  - User with role "user" is not authorized to view any other user
 
-View one user -  Endpoint is available at "http://127.0.0.1:8000/api/login/<id>" via GET request.
+View one user -  Endpoint is available at "http://127.0.0.1:8000/api/users/[id]" via GET request.
  - Super-admin can view any user by providing the id
  - User with role "admin" can view any user by providing id [Super-admin excluded]
  - User with role "user" is authorized to view their own information by providing id
     
-Delete user -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" via DELETE request.
+Delete user -  Endpoint is available at "http://127.0.0.1:8000/api/users/[id]" via DELETE request.
  - Super-admin can delete any user by providing the id
  - User with role "admin" can delete any user by providing id [Super-admin and other admins excluded]
  - User with role "user" is not authorized to trigger this API
  
-Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/<id>" via PUT request.
+Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/[id]" via PUT request.
  - Only Super-admin can edit user roles by providing the id and input field "role"
     
 
 
 ### Checkin and Checkout APIs
     
-Checkin Endpoint - Available at http://127.0.0.1:8000/api/checkin via GET request
-Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET request
+- Checkin Endpoint - Available at http://127.0.0.1:8000/api/checkin via GET request
     
-    Checkin API saves user ip, location and checkin time to the database.
-    Checkout API calculates the stay_duration of a user, and checks them out of the system [Ends their session].
+- Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET request
+    
+Checkin API saves user ip, location and checkin time to the database.
+    
+Checkout API calculates the stay_duration of a user, and checks them out of the system [Ends their session].
 
 At the end of each day, stay_duration of each user is summmed-up and stored [View app\Console\Commands\CalculateDailySessions.php for details]
