@@ -5,7 +5,9 @@
 This project leverages spatie package in order to assign roles and permissions to a user. User is added to the system by a super-admin [A role is assigned here]. Once added, user can trigger checkin and checkout APIs.
 
 Checkin API - Captures authorized user's ip, and checkin time.
-Checkout API - Captures authorized user's ip, calculates their stay_duration and saves the details in postgreSQL.
+Checkout API - Captures authorized user's ip, calculates their stay_duration and saves the details in postgreSQL. 
+
+At the end of the day, using cron job feature, user's stay duration for the day is summed up, and added to daily_user_sessions table (referencing create_daily_user_sessions migration under database/migrations)
 
 
 ### To spin up the server
