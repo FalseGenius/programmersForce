@@ -93,7 +93,7 @@ Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/[id]" v
     
 - Checkin Endpoint - Available at http://127.0.0.1:8000/api/login via GET request
     
-- Checkout Endpoint - Available at http://127.0.0.1:8000/api/logout via GET request
+- Checkout Endpoint - Available at http://127.0.0.1:8000/api/logout via POST request
     
 Checkin API saves user ip, location and checkin time to the database.
     
