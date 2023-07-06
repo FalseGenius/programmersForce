@@ -2,12 +2,12 @@
 
 ## Project Description
 
-This project leverages spatie package in order to assign roles and permissions to a user. User is added to the system by a super-admin [A role is assigned here]. Once added, user can trigger checkin and checkout APIs.
+This project leverages spatie package in order to assign roles and permissions to a user. User is added to the system by a super-admin [A role is assigned here]. A session is created when a user logs in. A session is time that has elapsed when a user logs in, and logs out (willingly, or in case of inactivity). A session ends when logout api is triggered, calculating the stay_duration and storing the session along with the location in the database marking the end of it.
 
-Checkin API - Captures authorized user's ip, and checkin time.
-Checkout API - Captures authorized user's ip, calculates their stay_duration and saves the details in postgreSQL. 
+Checkin API - Captures authorized user's IP, and check-in time.
+Checkout API - Captures authorized user's ip, calculates their stay_duration, and saves the details in PostgreSQL as a session. 
 
-At the end of the day, using cron job feature, user's stay duration for the day is summed up, and added to daily_user_sessions table (referencing create_daily_user_sessions migration under database/migrations)
+At the end of the day, using the cron job feature, the user's stay duration for the day is summed up and added to the daily_user_sessions table (referencing create_daily_user_sessions migration under database/migrations)
 
 
 ### To spin up the server
@@ -89,11 +89,11 @@ Update role -  Endpoint is available at "http://127.0.0.1:8000/api/users/[id]" v
     
 
 
-### Checkin and Checkout APIs
+### Checkin and Checkout APIs (Refer to app/Http/Controllers/AuthController for logic details)
     
-- Checkin Endpoint - Available at http://127.0.0.1:8000/api/checkin via GET request
+- Checkin Endpoint - Available at http://127.0.0.1:8000/api/login via GET request
     
-- Checkout Endpoint - Available at http://127.0.0.1:8000/api/checkout via GET request
+- Checkout Endpoint - Available at http://127.0.0.1:8000/api/logout via GET request
     
 Checkin API saves user ip, location and checkin time to the database.
     
